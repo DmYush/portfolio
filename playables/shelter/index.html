@@ -98,7 +98,17 @@
 <script src="src/import-map.json" type="systemjs-importmap" charset="utf-8"> </script>
 
 <script>
-    System.import('./index.js').catch(function(err) { console.error(err); })
+    System.import('./index.js').then(function () {
+      // Fallback: если TS-бандл старый и не вызвал hideShelterLoader
+      setTimeout(function () {
+        var loader = document.querySelector('.shelter-loader');
+        if (!loader || loader.style.opacity === '0') return;
+        if (typeof window.setShelterProgress === 'function') window.setShelterProgress(100);
+        setTimeout(function () {
+          if (typeof window.hideShelterLoader === 'function') window.hideShelterLoader();
+        }, 200);
+      }, 2500);
+    }).catch(function (err) { console.error(err); });
 </script>
 
 </body>
