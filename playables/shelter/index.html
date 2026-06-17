@@ -2,52 +2,94 @@
 <html>
 <head>
   <meta charset="utf-8">
-
   <title>Cocos Creator | Shelter</title>
-
-  <!--http://www.html5rocks.com/en/mobile/mobifying/-->
-  <meta name="viewport"
-        content="width=device-width,user-scalable=no,initial-scale=1,minimum-scale=1,maximum-scale=1,minimal-ui=true"/>
-
-  <!--https://developer.apple.com/library/safari/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/MetaTags.html-->
+  <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,minimum-scale=1,maximum-scale=1,minimal-ui=true"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
-
-  <!-- force webkit on 360 -->
   <meta name="renderer" content="webkit"/>
   <meta name="force-rendering" content="webkit"/>
-  <!-- force edge on IE -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
   <meta name="msapplication-tap-highlight" content="no">
-
-  <!-- force full screen on some browser -->
   <meta name="full-screen" content="yes"/>
   <meta name="x5-fullscreen" content="true"/>
   <meta name="360-fullscreen" content="true"/>
-
-  <!--fix fireball/issues/3568 -->
-  <!--<meta name="browsermode" content="application">-->
   <meta name="x5-page-mode" content="app">
-
-  <!--<link rel="apple-touch-icon" href=".png" />-->
-  <!--<link rel="apple-touch-icon-precomposed" href=".png" />-->
-
   <link rel="stylesheet" type="text/css" href="style.css"/>
-
+  <link rel="stylesheet" type="text/css" href="splash.css"/>
 </head>
 <body>
-  <div id="GameDiv" cc_exact_fit_screen="true">
-      <div id="Cocos3dGameContainer">
-        <canvas id="GameCanvas" oncontextmenu="event.preventDefault()" tabindex="99"></canvas>
+
+  <!-- ═══════════════════════════════════════════════════
+       CUSTOM SPLASH / LOADER
+       Удаляется из TypeScript через SplashRemover.ts
+       ═══════════════════════════════════════════════════ -->
+  <div class="shelter-loader">
+
+    <div class="shelter-loader__bg"></div>
+
+    <div class="shelter-loader__logo">
+      <img src="splash/logo.png" alt="Bombidler"/>
+    </div>
+
+    <div class="shelter-loader__bar-wrap">
+      <div class="shelter-loader__bar-track">
+        <div class="shelter-loader__bar-clip" id="bar-clip">
+          <div class="shelter-loader__bar-fill" id="bar-fill"></div>
+        </div>
       </div>
     </div>
-  
+
+  </div>
+  <!-- /CUSTOM SPLASH -->
+
+  <div id="GameDiv" cc_exact_fit_screen="true">
+    <div id="Cocos3dGameContainer">
+      <canvas id="GameCanvas" oncontextmenu="event.preventDefault()" tabindex="99"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // ── Анимация прогресс-бара (time-based, как в Gun_hero) ──────────────────
+    // Реальный прогресс движка перехватывается из TypeScript (SplashRemover).
+    // Этот JS даёт фейковый прогресс до ~85%, остаток добирает движок.
+    (function () {
+      var clip  = document.getElementById('bar-clip');
+      var fill  = document.getElementById('bar-fill');
+      var start = Date.now();
+      var speed = 0.045; // % в миллисекунду
+
+      function setProgress(pct) {
+        if (clip) clip.style.width = pct.toFixed(1) + '%';
+        if (fill) fill.style.width = pct > 0 ? (100 / pct * 100).toFixed(2) + '%' : '100%';
+      }
+
+      function tick() {
+        var val = Math.min((Date.now() - start) * speed + 2, 85);
+        setProgress(val);
+        if (val < 85) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+
+      window.setShelterProgress = function (value) {
+        setProgress(Math.max(85, Math.min(100, value)));
+      };
+
+      // Вызывается из SplashRemover.ts когда первая сцена готова
+      window.hideShelterLoader = function () {
+        var loader = document.querySelector('.shelter-loader');
+        if (!loader) return;
+        loader.style.transition = 'opacity 0.45s ease';
+        loader.style.opacity    = '0';
+        setTimeout(function () {
+          if (loader.parentNode) loader.parentNode.removeChild(loader);
+        }, 480);
+      };
+    })();
+  </script>
 
 <!-- Polyfills bundle. -->
-
 <script src="src/polyfills.bundle.js" charset="utf-8"> </script>
-
 
 <!-- SystemJS support. -->
 <script src="src/system.bundle.js" charset="utf-8"> </script>

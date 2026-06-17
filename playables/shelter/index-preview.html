@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Shelter — Splash Preview</title>
+  <link rel="stylesheet" href="splash.css"/>
+  <style>
+    html, body { margin:0; padding:0; width:100%; height:100%; background:#000; }
+  </style>
+</head>
+<body>
+
+  <div class="shelter-loader">
+    <div class="shelter-loader__bg"></div>
+
+    <div class="shelter-loader__logo">
+      <img src="splash/logo.png" alt="Bombidler"/>
+    </div>
+
+    <div class="shelter-loader__bar-wrap">
+      <div class="shelter-loader__bar-track">
+        <div class="shelter-loader__bar-clip" id="bar-clip">
+          <div class="shelter-loader__bar-fill" id="bar-fill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var clip  = document.getElementById('bar-clip');
+    var fill  = document.getElementById('bar-fill');
+    var start = Date.now();
+    var speed = 0.05; // % в мс
+
+    function tick() {
+      var pct = Math.min((Date.now() - start) * speed + 2, 100);
+
+      // Клип обрезает справа
+      clip.style.width = pct.toFixed(1) + '%';
+
+      // Заливка всегда шириной 100% трека, не клипа
+      // clip имеет width=pct%, fill должна быть 100%/pct*100% относительно клипа
+      var fillW = pct > 0 ? (100 / pct * 100).toFixed(2) : '100';
+      fill.style.width = fillW + '%';
+
+      if (pct < 100) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
