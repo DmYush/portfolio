@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════════════
    Shelter — Splash Screen
-   Стиль: Bombidler / полноэкранный арт + бар снизу
    ═══════════════════════════════════════════════════ */
 
 body {
@@ -9,97 +8,96 @@ body {
   overflow: hidden;
 }
 
-/* ── Оверлей ──────────────────────────────────────── */
 .shelter-loader {
   position: fixed;
   inset: 0;
   z-index: 9999;
   overflow: hidden;
+  background-color: #1a3a5c;
 }
 
-/* ── Фоновый арт — фуллскрин ──────────────────────── */
+/* ── Фон ──────────────────────────────────────────── */
 .shelter-loader__bg {
   position: absolute;
   inset: 0;
-  background: url('splash/bg.png') center center / cover no-repeat;
-  background-color: #1a3a5c; /* fallback пока грузится */
+}
+
+.shelter-loader__bg img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
 }
 
 /* ── Лого ─────────────────────────────────────────── */
 .shelter-loader__logo {
   position: absolute;
-  top: 5%;
+  top: calc(max(5%, env(safe-area-inset-top, 0px)) + 1cm);
   left: 50%;
   transform: translateX(-50%);
-  width: 78%;
-  max-width: 360px;
+  width: min(78vw, 360px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 .shelter-loader__logo img {
   width: 100%;
   height: auto;
   display: block;
-  /* лёгкая тень для читаемости поверх арта */
-  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.55));
 }
 
-/* ── Прогресс-бар — снизу ─────────────────────────── */
+/* ── Прогресс-бар ─────────────────────────────────── */
 .shelter-loader__bar-wrap {
   position: absolute;
-  bottom: 6%;
+  bottom: calc(max(6%, env(safe-area-inset-bottom, 0px)) + 1cm);
   left: 50%;
   transform: translateX(-50%);
-  width: 76%;
-  max-width: 340px;
+  width: min(76vw, 340px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
-/* Трек — синяя подложка */
 .shelter-loader__bar-track {
   position: relative;
   width: 100%;
-  /* Сохраняем пропорции трекового изображения.
-     loader_bar_01.png примерно 1050×130 px → aspect ~8.1:1 */
-  aspect-ratio: 8.1 / 1;
-  background: url('splash/bar_track.png') center / 100% 100% no-repeat;
 }
 
-/* Клипирующий контейнер для заливки */
+.shelter-loader__bar-track-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Маска поверх трека: fill той же формы, что и синяя полоска */
 .shelter-loader__bar-clip {
-  position: absolute;
-  /* небольшие отступы, чтобы жёлтый бар не вылезал за скруглённые углы трека */
-  top: 12%;
-  left: 1.5%;
-  bottom: 12%;
-  width: 0%;                 /* JS анимирует это значение */
-  overflow: hidden;
-  border-radius: 99px;       /* копирует скругление track-изображения */
-  transition: width 0.12s linear;
-}
-
-/* Жёлтая заливка — всегда растянута на полную ширину ТРЕКА,
-   клип-контейнер просто обрезает её справа */
-.shelter-loader__bar-fill {
   position: absolute;
   top: 0;
   left: 0;
-  height: 100%;
-  /* ширина = 100% от трека, а не от клипа */
-  width: calc(100% / var(--progress, 0.01));
-  max-width: 9999px;
-  background: url('splash/bar_fill.png') left center / auto 100% no-repeat;
+  bottom: 0;
+  width: 0%;
+  overflow: hidden;
 }
 
-/* ── Landscape адаптация ──────────────────────────── */
+.shelter-loader__bar-fill-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  pointer-events: none;
+}
+
 @media (orientation: landscape) {
   .shelter-loader__logo {
-    top: 3%;
-    width: 40%;
-    max-width: 260px;
+    top: calc(max(3%, env(safe-area-inset-top, 0px)) + 1cm);
+    width: min(40vw, 260px);
   }
 
   .shelter-loader__bar-wrap {
-    bottom: 5%;
-    width: 44%;
-    max-width: 260px;
+    bottom: calc(max(5%, env(safe-area-inset-bottom, 0px)) + 1cm);
+    width: min(44vw, 260px);
   }
 }

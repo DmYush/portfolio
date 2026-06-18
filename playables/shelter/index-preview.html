@@ -2,51 +2,91 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <title>Shelter — Splash Preview</title>
   <link rel="stylesheet" href="splash.css"/>
-  <style>
-    html, body { margin:0; padding:0; width:100%; height:100%; background:#000; }
-  </style>
+  <link rel="stylesheet" href="preview.css"/>
+  <link rel="preload" as="image" href="splash/bg.webp" type="image/webp" fetchpriority="high"/>
+  <link rel="preload" as="image" href="splash/logo.png"/>
 </head>
-<body>
+<body class="preview-body">
 
-  <div class="shelter-loader">
-    <div class="shelter-loader__bg"></div>
+  <div class="preview-toolbar">
+    <span class="preview-toolbar__label">Устройство:</span>
+    <button type="button" data-device="full">Desktop</button>
+    <button type="button" data-device="iphone14" class="is-active">iPhone 14</button>
+    <button type="button" data-device="iphoneSE">iPhone SE</button>
+    <button type="button" data-device="pixel7">Pixel 7</button>
+    <button type="button" data-device="ipad">iPad</button>
+  </div>
 
-    <div class="shelter-loader__logo">
-      <img src="splash/logo.png" alt="Bombidler"/>
-    </div>
+  <div class="preview-stage">
+    <div class="preview-device preview-device--framed" id="preview-device" style="width:390px;height:844px;">
+      <div class="shelter-loader">
+        <div class="shelter-loader__bg">
+          <img src="splash/bg.webp" alt="" fetchpriority="high" decoding="async"/>
+        </div>
 
-    <div class="shelter-loader__bar-wrap">
-      <div class="shelter-loader__bar-track">
-        <div class="shelter-loader__bar-clip" id="bar-clip">
-          <div class="shelter-loader__bar-fill" id="bar-fill"></div>
+        <div class="shelter-loader__logo">
+          <img src="splash/logo.png" alt="Bombidler"/>
+        </div>
+
+        <div class="shelter-loader__bar-wrap">
+          <div class="shelter-loader__bar-track">
+            <img class="shelter-loader__bar-track-img" src="splash/bar_track.png" alt=""/>
+            <div class="shelter-loader__bar-clip" id="bar-clip">
+              <img class="shelter-loader__bar-fill-img" id="bar-fill" src="splash/bar_fill.png" alt=""/>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <script src="splash-bar.js"></script>
   <script>
-    var clip  = document.getElementById('bar-clip');
-    var fill  = document.getElementById('bar-fill');
-    var start = Date.now();
-    var speed = 0.05; // % в мс
+    var devices = {
+      full:    { w: null, h: null, framed: false },
+      iphone14:{ w: 390, h: 844, framed: true },
+      iphoneSE:{ w: 375, h: 667, framed: true },
+      pixel7:  { w: 393, h: 852, framed: true },
+      ipad:    { w: 820, h: 1180, framed: true }
+    };
 
-    function tick() {
-      var pct = Math.min((Date.now() - start) * speed + 2, 100);
+    var frame = document.getElementById('preview-device');
+    var buttons = document.querySelectorAll('[data-device]');
 
-      // Клип обрезает справа
-      clip.style.width = pct.toFixed(1) + '%';
+    function applyDevice(name) {
+      var device = devices[name] || devices.iphone14;
+      frame.classList.toggle('preview-device--framed', device.framed);
+      frame.classList.toggle('preview-device--full', name === 'full');
 
-      // Заливка всегда шириной 100% трека, не клипа
-      // clip имеет width=pct%, fill должна быть 100%/pct*100% относительно клипа
-      var fillW = pct > 0 ? (100 / pct * 100).toFixed(2) : '100';
-      fill.style.width = fillW + '%';
+      if (name === 'full') {
+        frame.style.width = '';
+        frame.style.height = '';
+      } else {
+        frame.style.width = device.w + 'px';
+        frame.style.height = device.h + 'px';
+      }
 
-      if (pct < 100) requestAnimationFrame(tick);
+      buttons.forEach(function (btn) {
+        btn.classList.toggle('is-active', btn.getAttribute('data-device') === name);
+      });
+
+      if (history.replaceState) {
+        history.replaceState(null, '', '?device=' + name);
+      }
     }
-    requestAnimationFrame(tick);
+
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        applyDevice(btn.getAttribute('data-device'));
+      });
+    });
+
+    var initial = new URLSearchParams(location.search).get('device') || 'iphone14';
+    applyDevice(initial);
+    initShelterSplashBar({ speed: 0.05, maxFake: 100 });
   </script>
 </body>
 </html>
